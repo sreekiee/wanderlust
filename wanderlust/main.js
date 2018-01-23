@@ -1,11 +1,11 @@
 // Foursquare API Info
-const clientId = '';
-const clientSecret = '';
+const clientId = '4JHWJCM5VOFXXMKQIAAIWB5LHTNXURAAFBFMEVHO3UXAS2MJ';
+const clientSecret = 'ITLHPAIY54EQAPTBBNDHUNQHEXQU100JJV34ORYQXH3CCEEO';
 const url = 'https://api.foursquare.com/v2/venues/explore?near=';
 const imgPrefix = 'https://igx.4sqi.net/img/general/150x200';
 
 // APIXU Info
-const apiKey = '';
+const apiKey = 'afc3f860d40a45879a744924182201';
 const forecastUrl = 'https://api.apixu.com/v1/forecast.json?key=';
 
 // Page Elements
@@ -26,6 +26,7 @@ async function getVenues(){
     if(response.ok){
       let jsonResponse = await response.json();
       let venues = jsonResponse.response.groups[0].items.map(location => location.venue);
+
       return venues;
     }
   }catch(error){
@@ -54,11 +55,11 @@ function renderVenues(venues) {
     let venueContent =
       '<h2>' + venues[index].name + '</h2>' +
       '<img class="venueimage" src="' + imgPrefix +
-      '<img suffix>' + '"/>' +
+      venues[index].photos.groups[0].items[0].suffix + '"/>' +
       '<h3>Address:</h3>' +
-      '<p>' + '<address>' + '</p>' +
-      '<p>' + '<city>' + '</p>' +
-      '<p>' + '<country>' + '</p>';
+      '<p>' + venues[index].location.address + '</p>' +
+      '<p>' + venues[index].location.city + '</p>' +
+      '<p>' + venues[index].location.country + '</p>';
     $venue.append(venueContent);
   });
   $destination.append('<h2>' + venues[0].location.city + '</h2>');
@@ -67,11 +68,11 @@ function renderVenues(venues) {
 function renderForecast(days) {
   $weatherDivs.forEach(($day, index) => {
     let weatherContent =
-      '<h2> High: ' + '<max temp>' + '</h2>' +
-      '<h2> Low: ' + '<min temp>' + '</h2>' +
-      '<img src="http://' + '<icon>' +
+      '<h2> High: ' + days[index].day.maxtemp_f + '</h2>' +
+      '<h2> Low: ' + days[index].day.mintemp_f + '</h2>' +
+      '<img src="http://' + days[index].day.condition.icon +
       '" class="weathericon" />' +
-      '<h2>' + '<day of the week>' + '</h2>';
+      '<h2>' + weekDays[(new Date(days[index].date)).getDay()] + '</h2>';
     $day.append(weatherContent);
   });
 }
@@ -81,8 +82,8 @@ function executeSearch() {
   $weatherDivs.forEach(day => day.empty());
   $destination.empty();
   $container.css("visibility", "visible");
-  getVenues();
-  getForecast();
+  getVenues().then(venues => renderVenues(venues));
+  getForecast().then(forecast => renderForecast(forecast));
   return false;
 }
 
